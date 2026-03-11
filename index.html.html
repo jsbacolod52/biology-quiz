@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biology Q3 Quiz Blast 🧬</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0c29;
+    --surface: #1e1b4b;
+    --card: #2d2a6e;
+    --accent1: #f43f5e;
+    --accent2: #facc15;
+    --accent3: #34d399;
+    --accent4: #60a5fa;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 20% 20%, #7c3aed33 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, #f43f5e22 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  header {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(30,27,75,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .logo {
+    font-family: 'Fredoka One', cursive; font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--accent2), var(--accent1));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo small { font-size: 1rem; color: var(--muted); -webkit-text-fill-color: var(--muted); }
+  .nav-tabs { display: flex; gap: 8px; }
+  .tab-btn {
+    padding: 8px 20px; border: none; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem;
+    cursor: pointer; transition: all 0.2s;
+    background: transparent; color: var(--muted);
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent1), #c026d3);
+    color: white; box-shadow: 0 4px 20px rgba(244,63,94,0.4);
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.08); }
+
+  .screen { display: none; position: relative; z-index: 5; }
+  .screen.active { display: block; }
+
+  /* ===== BROWSE SCREEN ===== */
+  .browse-container { max-width: 860px; margin: 36px auto; padding: 0 20px; }
+  .section-title {
+    font-family: 'Fredoka One', cursive; font-size: 2rem; margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .section-sub { color: var(--muted); margin-bottom: 28px; font-size: 0.95rem; }
+
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 18px; border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 50px; background: transparent; color: var(--muted);
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(250,204,21,0.1); }
+
+  .q-list-item {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius); padding: 18px 22px;
+    margin-bottom: 10px;
+    display: flex; align-items: flex-start; gap: 14px;
+    animation: slideIn 0.3s ease;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .q-list-item:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--accent2); }
+  @keyframes slideIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  .q-num-badge {
+    background: linear-gradient(135deg, var(--accent2), var(--accent1));
+    color: #0f0c29; font-family: 'Fredoka One', cursive;
+    font-size: 1rem; min-width: 36px; height: 36px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .q-content { flex: 1; }
+  .q-type-tag {
+    font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1px; padding: 2px 10px; border-radius: 50px;
+    display: inline-block; margin-bottom: 6px;
+  }
+  .tag-mc { background: rgba(96,165,250,0.2); color: var(--accent4); }
+  .tag-tf { background: rgba(52,211,153,0.2); color: var(--accent3); }
+  .tag-match { background: rgba(250,204,21,0.2); color: var(--accent2); }
+  .tag-fill { background: rgba(244,63,94,0.2); color: var(--accent1); }
+  .q-text { font-weight: 700; font-size: 0.97rem; margin-bottom: 8px; }
+  .q-answers { display: flex; gap: 6px; flex-wrap: wrap; }
+  .q-ans-chip {
+    padding: 3px 11px; border-radius: 50px; font-size: 0.78rem; font-weight: 700;
+    background: rgba(255,255,255,0.07);
+  }
+  .q-ans-chip.correct { background: rgba(52,211,153,0.2); color: var(--accent3); border: 1px solid var(--accent3); }
+
+  /* ===== PLAY SCREEN ===== */
+  .play-container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+  .play-start { text-align: center; padding: 60px 20px; }
+  .play-start .big-icon { font-size: 5rem; margin-bottom: 20px; }
+  .play-start h2 {
+    font-family: 'Fredoka One', cursive; font-size: 2.5rem; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent3), var(--accent4));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .play-start p { color: var(--muted); margin-bottom: 12px; }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0 32px; }
+  .mode-card {
+    background: var(--card); border: 2px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius); padding: 18px; cursor: pointer;
+    transition: all 0.2s; text-align: left;
+  }
+  .mode-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+  .mode-card.selected { border-color: var(--accent2); background: rgba(250,204,21,0.08); }
+  .mode-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .mode-name { font-weight: 800; font-size: 0.95rem; }
+  .mode-desc { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+
+  .btn {
+    padding: 12px 28px; border: none; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+    cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--accent1), #c026d3); color: white; box-shadow: 0 4px 20px rgba(244,63,94,0.4); }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid rgba(255,255,255,0.15); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.14); }
+  .btn-success { background: linear-gradient(135deg, var(--accent3), #0891b2); color: white; box-shadow: 0 4px 20px rgba(52,211,153,0.4); }
+  .btn-success:hover { transform: translateY(-2px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  .game-active { display: none; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.08); border-radius: 50px; height: 8px; margin-bottom: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent3), var(--accent4)); border-radius: 50px; transition: width 0.5s ease; }
+  .progress-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+  .score-badge { font-family: 'Fredoka One', cursive; font-size: 1.1rem; background: linear-gradient(135deg, var(--accent2), var(--accent1)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .timer-wrap { display: flex; justify-content: center; margin-bottom: 18px; }
+  .timer-circle {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--card); border: 3px solid var(--accent2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--accent2);
+    box-shadow: 0 0 20px rgba(250,204,21,0.3); transition: border-color 0.5s, color 0.5s;
+  }
+  .timer-circle.urgent { border-color: var(--accent1); color: var(--accent1); box-shadow: 0 0 20px rgba(244,63,94,0.5); animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+
+  .question-card {
+    background: var(--card); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 18px; text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  }
+  .active-type-tag { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 2px 12px; border-radius: 50px; display: inline-block; margin-bottom: 12px; }
+  .question-text { font-size: 1.2rem; font-weight: 800; line-height: 1.5; }
+
+  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .answers-grid.two-col { grid-template-columns: 1fr 1fr; }
+  .answers-grid.one-col { grid-template-columns: 1fr; }
+
+  .answer-btn {
+    padding: 16px 18px; border: none; border-radius: var(--radius);
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem;
+    cursor: pointer; text-align: left; transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px; color: white;
+  }
+  .answer-btn:nth-child(1) { background: linear-gradient(135deg, #c026d3aa, #7c3aedaa); border: 2px solid #c026d3; }
+  .answer-btn:nth-child(2) { background: linear-gradient(135deg, #0891b2aa, #2563ebaa); border: 2px solid #0891b2; }
+  .answer-btn:nth-child(3) { background: linear-gradient(135deg, #16a34aaa, #0d9488aa); border: 2px solid #16a34a; }
+  .answer-btn:nth-child(4) { background: linear-gradient(135deg, #d97706aa, #dc2626aa); border: 2px solid #d97706; }
+  .answer-btn:hover:not(:disabled) { transform: scale(1.02); filter: brightness(1.2); }
+  .answer-btn:disabled { cursor: not-allowed; }
+  .answer-btn.correct-reveal { background: linear-gradient(135deg, #16a34a, #059669) !important; border-color: #34d399 !important; transform: scale(1.03); box-shadow: 0 0 24px rgba(52,211,153,0.6); }
+  .answer-btn.wrong-reveal { opacity: 0.35; filter: grayscale(0.5); }
+  .ans-letter { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; }
+
+  .feedback-bar {
+    padding: 14px 22px; border-radius: var(--radius); margin-top: 14px;
+    text-align: center; font-weight: 800; font-size: 1rem;
+    display: none; animation: slideIn 0.3s ease;
+  }
+  .feedback-bar.correct { background: rgba(52,211,153,0.2); color: var(--accent3); border: 1px solid var(--accent3); }
+  .feedback-bar.wrong { background: rgba(244,63,94,0.15); color: var(--accent1); border: 1px solid var(--accent1); }
+  .feedback-bar.timeout { background: rgba(250,204,21,0.15); color: var(--accent2); border: 1px solid var(--accent2); }
+
+  .explain-bar {
+    padding: 12px 18px; border-radius: var(--radius); margin-top: 10px;
+    font-size: 0.87rem; color: var(--muted); background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08); display: none; line-height: 1.5;
+    animation: slideIn 0.4s ease;
+  }
+
+  .results-screen { text-align: center; padding: 40px 20px; display: none; }
+  .results-screen h2 { font-family: 'Fredoka One', cursive; font-size: 2.8rem; margin-bottom: 8px; }
+  .final-score { font-family: 'Fredoka One', cursive; font-size: 5rem; background: linear-gradient(135deg, var(--accent2), var(--accent1)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 16px 0; }
+  .stars { font-size: 2.5rem; margin-bottom: 20px; }
+  .result-breakdown { display: flex; gap: 20px; justify-content: center; margin: 20px 0 30px; flex-wrap: wrap; }
+  .result-stat { background: var(--card); border-radius: var(--radius); padding: 16px 28px; }
+  .result-stat .num { font-family: 'Fredoka One', cursive; font-size: 2rem; }
+  .result-stat .lbl { color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+  .green { color: var(--accent3); }
+  .red { color: var(--accent1); }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent3); color: #0f0c29; padding: 12px 24px; border-radius: 50px; font-weight: 800; z-index: 1000; transition: transform 0.3s ease; pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🧬 BioBlast <small>Q3 Review</small></div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showScreen('browse')">📋 Questions</button>
+    <button class="tab-btn" onclick="showScreen('play')">▶️ Play</button>
+  </div>
+</header>
+
+<!-- BROWSE SCREEN -->
+<div id="screen-browse" class="screen active">
+  <div class="browse-container">
+    <div class="section-title">All Questions</div>
+    <div class="section-sub" id="browseSubtitle">Loading…</div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterQuestions('all', this)">All</button>
+      <button class="filter-btn" onclick="filterQuestions('mc', this)">Multiple Choice</button>
+      <button class="filter-btn" onclick="filterQuestions('tf', this)">True / False</button>
+      <button class="filter-btn" onclick="filterQuestions('match', this)">Matching</button>
+      <button class="filter-btn" onclick="filterQuestions('fill', this)">Fill in the Blank</button>
+    </div>
+    <div id="questionsList"></div>
+  </div>
+</div>
+
+<!-- PLAY SCREEN -->
+<div id="screen-play" class="screen">
+  <div class="play-container">
+
+    <div class="play-start" id="playStart">
+      <div class="big-icon">🚀</div>
+      <h2>Ready to Study?</h2>
+      <p>47 Biology Q3 questions loaded!</p>
+      <p style="font-size:0.85rem; margin-bottom:4px;">Choose a mode:</p>
+      <div class="mode-grid">
+        <div class="mode-card selected" onclick="selectMode('all', this)">
+          <div class="mode-icon">🌐</div>
+          <div class="mode-name">All Questions</div>
+          <div class="mode-desc">All 47 questions — full review</div>
+        </div>
+        <div class="mode-card" onclick="selectMode('mc', this)">
+          <div class="mode-icon">🔵</div>
+          <div class="mode-name">Multiple Choice</div>
+          <div class="mode-desc">18 MC questions only</div>
+        </div>
+        <div class="mode-card" onclick="selectMode('tf', this)">
+          <div class="mode-icon">✅</div>
+          <div class="mode-name">True / False</div>
+          <div class="mode-desc">7 true/false questions</div>
+        </div>
+        <div class="mode-card" onclick="selectMode('match', this)">
+          <div class="mode-icon">🔤</div>
+          <div class="mode-name">Matching / Fill</div>
+          <div class="mode-desc">Vocab + fill-in-the-blank</div>
+        </div>
+      </div>
+      <button class="btn btn-success" onclick="startGame()">🚀 Start Quiz!</button>
+    </div>
+
+    <div class="game-active" id="gameActive">
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-label">
+        <span id="progressLabel">Q 1 of 47</span>
+        <span class="score-badge">⭐ <span id="scoreLabel">0</span></span>
+      </div>
+      <div class="timer-wrap"><div class="timer-circle" id="timerCircle">20</div></div>
+      <div class="question-card">
+        <div class="active-type-tag" id="activeTag"></div>
+        <div class="question-text" id="activeQuestion">–</div>
+      </div>
+      <div class="answers-grid" id="answersGrid"></div>
+      <div class="feedback-bar" id="feedbackBar"></div>
+      <div class="explain-bar" id="explainBar"></div>
+    </div>
+
+    <div class="results-screen" id="resultsScreen">
+      <div class="stars" id="starsDisplay">⭐⭐⭐</div>
+      <h2>Quiz Complete!</h2>
+      <div class="final-score" id="finalScore">0 / 0</div>
+      <div class="result-breakdown">
+        <div class="result-stat"><div class="num green" id="correctCount">0</div><div class="lbl">Correct</div></div>
+        <div class="result-stat"><div class="num red" id="wrongCount">0</div><div class="lbl">Wrong</div></div>
+        <div class="result-stat"><div class="num" id="pctCount" style="color:var(--accent4)">0%</div><div class="lbl">Score</div></div>
+      </div>
+      <p style="color:var(--muted); margin-bottom:28px;" id="resultMsg"></p>
+      <button class="btn btn-success" onclick="startGame()" style="margin-right:12px;">🔄 Play Again</button>
+      <button class="btn btn-secondary" onclick="showScreen('browse')">📋 Review Questions</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const QUESTIONS = [
+  // ── MATCHING / VOCABULARY ──────────────────────────────────────────────
+  {
+    type: 'match',
+    q: 'What is the definition of MITOSIS?',
+    options: [
+      'The process by which one cell divides into two identical daughter cells',
+      'The process that produces gametes with half the chromosome number',
+      'A molecule that speeds up chemical reactions in the cell',
+      'An organism that makes its own food'
+    ],
+    correct: 0,
+    explain: 'Mitosis produces genetically identical cells used for growth and repair. It goes Prophase → Metaphase → Anaphase → Telophase.'
+  },
+  {
+    type: 'match',
+    q: 'What is the definition of ENZYME?',
+    options: [
+      'A molecule that stores genetic information',
+      'A molecule that lowers activation energy in a chemical reaction',
+      'The powerhouse of the cell',
+      'An organism that must consume other organisms for energy'
+    ],
+    correct: 1,
+    explain: 'Enzymes are biological catalysts — they speed up reactions without being used up. Each enzyme has a specific shape matching its substrate.'
+  },
+  {
+    type: 'match',
+    q: 'What is the definition of AUTOTROPH?',
+    options: [
+      'An organism that must consume other organisms for energy',
+      'An enzyme that unzips DNA strands during replication',
+      'An organism that makes its own food using sunlight or chemical energy',
+      'The organelle that packages and ships proteins'
+    ],
+    correct: 2,
+    explain: 'Plants, algae, and cyanobacteria are autotrophs. They use photosynthesis to convert CO₂ + H₂O + light into glucose and oxygen.'
+  },
+  {
+    type: 'match',
+    q: 'What is the definition of MITOCHONDRIA?',
+    options: [
+      'The organelle where proteins are synthesized from mRNA',
+      'The green pigment that captures light energy',
+      'The organelle that packages and ships proteins',
+      'The powerhouse of the cell; produces energy through cellular respiration'
+    ],
+    correct: 3,
+    explain: 'Mitochondria convert glucose + oxygen into ATP. The inner membrane (cristae) is where the ETC produces most ATP.'
+  },
+  {
+    type: 'match',
+    q: 'What is the function of DNA POLYMERASE?',
+    options: [
+      'An enzyme that builds new DNA strands during replication and proofreads for errors',
+      'An enzyme that unzips the two DNA strands during replication',
+      'An organelle that packages and ships proteins out of the cell',
+      'A molecule that lowers activation energy'
+    ],
+    correct: 0,
+    explain: 'DNA Polymerase reads the template strand and adds complementary nucleotides. It also proofreads to minimize errors.'
+  },
+  {
+    type: 'match',
+    q: 'What is the GOLGI APPARATUS?',
+    options: [
+      'The organelle that carries out photosynthesis',
+      'The enzyme that seals Okazaki fragments',
+      'The organelle that packages and ships proteins out of the cell',
+      'The main energy currency molecule used by cells'
+    ],
+    correct: 2,
+    explain: 'Think of the Golgi as the cell\'s post office. It receives proteins from the ER, modifies them, and packages them into vesicles for delivery.'
+  },
+  {
+    type: 'match',
+    q: 'What is the function of HELICASE?',
+    options: [
+      'Links together Okazaki fragments on the lagging strand',
+      'Builds new DNA strands and proofreads for errors',
+      'Transcribes DNA into mRNA',
+      'An enzyme that unzips the two DNA strands during replication'
+    ],
+    correct: 3,
+    explain: 'Helicase breaks hydrogen bonds between base pairs, separating the double helix so each strand can serve as a template.'
+  },
+  {
+    type: 'match',
+    q: 'What is the definition of HETEROTROPH?',
+    options: [
+      'An organism that makes its own food using sunlight',
+      'An organism that must consume other organisms for energy',
+      'The green pigment in chloroplasts',
+      'The main energy currency of the cell'
+    ],
+    correct: 1,
+    explain: 'Heterotrophs cannot make their own food. Animals, fungi, and most bacteria are heterotrophs — the opposite of autotrophs.'
+  },
+  {
+    type: 'match',
+    q: 'What is CHLOROPHYLL?',
+    options: [
+      'The enzyme that joins Okazaki fragments',
+      'The main energy currency of the cell',
+      'The green pigment in chloroplasts that captures light energy',
+      'The organelle that produces ATP through respiration'
+    ],
+    correct: 2,
+    explain: 'Chlorophyll absorbs sunlight (mostly red and blue wavelengths) and is found on the thylakoid membranes inside the chloroplast.'
+  },
+  {
+    type: 'match',
+    q: 'What is ATP?',
+    options: [
+      'The main energy currency molecule used by cells',
+      'An enzyme that lowers activation energy',
+      'A molecule that unzips DNA during replication',
+      'The green pigment that absorbs sunlight'
+    ],
+    correct: 0,
+    explain: 'ATP (adenosine triphosphate) stores energy in its phosphate bonds. When a bond is broken, energy is released to power cell processes.'
+  },
+
+  // ── FILL IN THE BLANK ─────────────────────────────────────────────────
+  {
+    type: 'fill',
+    q: 'Water moves from high water concentration to low water concentration through a process called ___.',
+    options: ['Osmosis', 'Active transport', 'Diffusion', 'Endocytosis'],
+    correct: 0,
+    explain: 'Osmosis is passive transport (no energy needed). Water crosses a semipermeable membrane to equalize concentration on both sides.'
+  },
+  {
+    type: 'fill',
+    q: 'A sequence of three mRNA nucleotides that codes for a single amino acid is called a ___.',
+    options: ['Anticodon', 'Gene', 'Codon', 'Exon'],
+    correct: 2,
+    explain: 'Each codon is a 3-letter mRNA code (e.g., AUG = start/Methionine). There are 64 codons — 61 code for amino acids and 3 are stop codons.'
+  },
+  {
+    type: 'fill',
+    q: 'The process by which RNA polymerase reads DNA and creates an mRNA strand is called ___.',
+    options: ['Translation', 'Replication', 'Transcription', 'Transduction'],
+    correct: 2,
+    explain: 'Transcription is the first step of protein synthesis. RNA polymerase unwinds DNA and builds a complementary mRNA strand.'
+  },
+  {
+    type: 'fill',
+    q: 'During intense exercise with limited oxygen, muscle cells produce lactic acid through ___.',
+    options: ['Aerobic respiration', 'Fermentation', 'Photosynthesis', 'The Krebs cycle'],
+    correct: 1,
+    explain: 'When oxygen runs out, cells switch to lactic acid fermentation to regenerate NAD⁺ so glycolysis can keep producing ATP. This causes the burning sensation in muscles.'
+  },
+  {
+    type: 'fill',
+    q: 'During cellular respiration, ___ is broken down to produce ATP.',
+    options: ['Oxygen', 'Water', 'Carbon dioxide', 'Glucose'],
+    correct: 3,
+    explain: 'Glucose (C₆H₁₂O₆) is the primary fuel for cellular respiration. It is first split during glycolysis in the cytoplasm.'
+  },
+  {
+    type: 'fill',
+    q: 'Substances that do not dissolve in water, such as oil, are described as ___.',
+    options: ['Hydrophilic', 'Polar', 'Hydrophobic', 'Ionic'],
+    correct: 2,
+    explain: '"Hydrophobic" means water-fearing. Nonpolar molecules like fats and oils cannot form hydrogen bonds with water.'
+  },
+  {
+    type: 'fill',
+    q: 'DNA replication is said to be ___ because each new DNA molecule contains one original and one new strand.',
+    options: ['Conservative', 'Semiconservative', 'Dispersive', 'Complementary'],
+    correct: 1,
+    explain: 'Each daughter DNA molecule keeps one old strand and gets one newly built strand. Confirmed by the Meselson-Stahl experiment.'
+  },
+  {
+    type: 'fill',
+    q: 'Transport that requires the cell to use energy (ATP) to move substances across the membrane is called ___.',
+    options: ['Passive transport', 'Osmosis', 'Facilitated diffusion', 'Active transport'],
+    correct: 3,
+    explain: 'Active transport moves substances against their concentration gradient (low → high). Example: sodium-potassium pump in nerve cells.'
+  },
+  {
+    type: 'fill',
+    q: 'The property of water that allows certain insects to walk on its surface is called ___.',
+    options: ['Cohesion', 'Adhesion', 'Surface tension', 'Capillary action'],
+    correct: 2,
+    explain: 'Surface tension is caused by hydrogen bonding between water molecules at the surface. They pull inward, creating a "skin" strong enough to support small insects.'
+  },
+  {
+    type: 'fill',
+    q: 'The process by which one parent cell divides into two genetically identical daughter cells is called ___.',
+    options: ['Meiosis', 'Mitosis', 'Binary fission', 'Cytokinesis'],
+    correct: 1,
+    explain: 'Mitosis ensures each daughter cell gets an exact copy of the parent cell\'s DNA. Used for growth, repair, and asexual reproduction.'
+  },
+
+  // ── TRUE / FALSE ──────────────────────────────────────────────────────
+  {
+    type: 'tf',
+    q: 'TRUE or FALSE: All cells have a nucleus.',
+    options: ['True', 'False'],
+    correct: 1,
+    explain: 'FALSE — Prokaryotes (bacteria and archaea) have no nucleus. Only eukaryotic cells have a membrane-bound nucleus.'
+  },
+  {
+    type: 'tf',
+    q: 'TRUE or FALSE: Cellular respiration occurs only in animal cells, not in plant cells.',
+    options: ['True', 'False'],
+    correct: 1,
+    explain: 'FALSE — ALL living cells, including plant cells, perform cellular respiration. Plants do both photosynthesis (make glucose) and cellular respiration (use it).'
+  },
+  {
+    type: 'tf',
+    q: 'TRUE or FALSE: Active transport requires the cell to use energy in the form of ATP.',
+    options: ['True', 'False'],
+    correct: 0,
+    explain: 'TRUE — Active transport pumps substances against their concentration gradient, which requires energy, unlike passive transport.'
+  },
+  {
+    type: 'tf',
+    q: 'TRUE or FALSE: Aerobic respiration produces significantly more ATP than fermentation.',
+    options: ['True', 'False'],
+    correct: 0,
+    explain: 'TRUE — Aerobic respiration produces ~36–38 ATP per glucose. Fermentation only produces 2 ATP. The extra comes from the Krebs cycle and ETC.'
+  },
+  {
+    type: 'tf',
+    q: 'TRUE or FALSE: RNA is double-stranded and uses deoxyribose sugar.',
+    options: ['True', 'False'],
+    correct: 1,
+    explain: 'FALSE — RNA is single-stranded and uses ribose sugar (not deoxyribose). It also uses uracil (U) instead of thymine (T). DNA is the double-stranded molecule.'
+  },
+  {
+    type: 'tf',
+    q: 'TRUE or FALSE: The smooth endoplasmic reticulum is responsible for making lipids in the cell.',
+    options: ['True', 'False'],
+    correct: 0,
+    explain: 'TRUE — Smooth ER lacks ribosomes and specializes in lipid synthesis, drug detoxification, and calcium storage.'
+  },
+  {
+    type: 'tf',
+    q: 'TRUE or FALSE: DNA replication is semiconservative, meaning each new molecule contains one original and one new strand.',
+    options: ['True', 'False'],
+    correct: 0,
+    explain: 'TRUE — Each new DNA molecule keeps one parent strand as a template. This preserves genetic information accurately with every cell division.'
+  },
+
+  // ── MULTIPLE CHOICE ───────────────────────────────────────────────────
+  {
+    type: 'mc',
+    q: 'What is the ultimate source of energy for most ecosystems?',
+    options: ['Wind', 'The Sun', 'Geothermal heat', 'Water'],
+    correct: 1,
+    explain: 'The Sun\'s light energy is captured by producers through photosynthesis and converted into chemical energy (glucose). All energy in a food chain originally comes from the sun.'
+  },
+  {
+    type: 'mc',
+    q: 'Which type of cellular transport requires energy (ATP)?',
+    options: ['Osmosis', 'Facilitated diffusion', 'Active transport', 'Simple diffusion'],
+    correct: 2,
+    explain: 'Other options are all forms of passive transport — they move substances down the concentration gradient with no energy. Active transport moves substances against the gradient.'
+  },
+  {
+    type: 'mc',
+    q: 'Where does photosynthesis take place in plant cells?',
+    options: ['Mitochondria', 'Nucleus', 'Ribosome', 'Chloroplast'],
+    correct: 3,
+    explain: 'Chloroplasts contain chlorophyll. Light reactions happen in the thylakoids; the Calvin Cycle happens in the stroma.'
+  },
+  {
+    type: 'mc',
+    q: 'What does the Central Dogma of molecular biology state?',
+    options: ['RNA → DNA → Protein', 'Protein → RNA → DNA', 'DNA → RNA → Protein', 'DNA → Protein → RNA'],
+    correct: 2,
+    explain: 'DNA is transcribed into mRNA (in the nucleus), then mRNA is translated into protein (at ribosomes). Information flows one way: DNA → RNA → Protein.'
+  },
+  {
+    type: 'mc',
+    q: 'During which phase of the cell cycle does most cell growth occur?',
+    options: ['Prophase', 'Metaphase', 'Cytokinesis', 'Interphase'],
+    correct: 3,
+    explain: 'Interphase is the longest phase of the cell cycle. During G1, S, and G2, the cell grows, copies its DNA, and prepares for division.'
+  },
+  {
+    type: 'mc',
+    q: 'If a producer has 5,000 Kcal of energy, how much energy is available to the secondary consumer?',
+    options: ['500 Kcal', '50 Kcal', '5 Kcal', '2,500 Kcal'],
+    correct: 1,
+    explain: 'Rule of 10: only 10% transfers to the next level. Producer (5,000) → Primary consumer (500) → Secondary consumer (50 Kcal). 90% is lost as heat.'
+  },
+  {
+    type: 'mc',
+    q: 'Every time energy transfers from one organism to the next in a food chain, approximately how much energy is LOST?',
+    options: ['50%', '10%', '75%', '90%'],
+    correct: 3,
+    explain: '90% of energy is lost as heat at each trophic level (Rule of 10). Only 10% is passed on. This is why food chains rarely have more than 4–5 levels.'
+  },
+  {
+    type: 'mc',
+    q: 'Which of the following correctly identifies the PRODUCTS of photosynthesis?',
+    options: ['CO₂ and water', 'ATP and NADH', 'Glucose and oxygen', 'Oxygen and carbon dioxide'],
+    correct: 2,
+    explain: 'Photosynthesis: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂. Products are glucose (stored energy) and oxygen (released as byproduct).'
+  },
+  {
+    type: 'mc',
+    q: 'Which of the following correctly identifies ALL elements found in nucleic acids?',
+    options: ['C, H, O, N', 'C, H, O, N, P', 'C, H, N, S', 'C, H, O, P'],
+    correct: 1,
+    explain: 'Nucleic acids (DNA and RNA) contain Carbon, Hydrogen, Oxygen, Nitrogen, and Phosphorus. The phosphate group (P) forms the backbone of DNA/RNA.'
+  },
+  {
+    type: 'mc',
+    q: 'During protein synthesis, where does TRANSLATION take place?',
+    options: ['Nucleus', 'Mitochondria', 'Ribosomes', 'Golgi apparatus'],
+    correct: 2,
+    explain: 'Translation happens at ribosomes (free in the cytoplasm or on the rough ER). The ribosome reads mRNA codons and assembles the amino acid chain.'
+  },
+  {
+    type: 'mc',
+    q: 'Which macromolecule is the main component of the cell membrane?',
+    options: ['Proteins', 'Carbohydrates', 'Nucleic acids', 'Lipids (phospholipids)'],
+    correct: 3,
+    explain: 'The cell membrane is a phospholipid bilayer. Phospholipids have a hydrophilic head and two hydrophobic tails that face inward.'
+  },
+  {
+    type: 'mc',
+    q: 'Which of the following foods is produced through ALCOHOLIC fermentation?',
+    options: ['Yogurt', 'Cheese', 'Bread', 'Sauerkraut'],
+    correct: 2,
+    explain: 'Bread rises because yeast performs alcoholic fermentation, producing CO₂ (puffs the dough) and ethanol (evaporates during baking). Yogurt/cheese use lactic acid fermentation.'
+  },
+  {
+    type: 'mc',
+    q: 'A cow breaks down grass and uses nutrients to build essential molecules. What characteristic of life does this represent?',
+    options: ['All living things reproduce', 'All living things respond to stimuli', 'All living things need and use energy', 'All living things maintain homeostasis'],
+    correct: 2,
+    explain: 'The cow takes in energy (grass/glucose) and uses it to fuel biological processes. This describes metabolism — all living things need and use energy.'
+  },
+  {
+    type: 'mc',
+    q: 'What is the primary function of enzymes?',
+    options: ['To store genetic information', 'To build cell membranes', 'To carry oxygen in the blood', 'To lower activation energy'],
+    correct: 3,
+    explain: 'Enzymes lower the activation energy needed to start a reaction, making it happen faster. They are not consumed — they return to their original shape after the reaction.'
+  },
+  {
+    type: 'mc',
+    q: 'During the Electron Transport Chain (ETC), approximately how many ATP molecules are produced?',
+    options: ['2 ATP', '4 ATP', '32–34 ATP', '10 ATP'],
+    correct: 2,
+    explain: 'The ETC is the most productive stage of aerobic respiration. Electrons from NADH and FADH₂ drive ATP synthase to produce ~32–34 ATP. Glycolysis = 2 ATP; Krebs = 2 ATP.'
+  },
+  {
+    type: 'mc',
+    q: 'Which enzyme links together pieces of newly synthesized DNA during replication?',
+    options: ['Helicase', 'RNA Polymerase', 'DNA Polymerase', 'Ligase'],
+    correct: 3,
+    explain: 'Ligase "glues" Okazaki fragments on the lagging strand together — the DNA stapler. Helicase unzips, DNA Polymerase builds, Ligase seals.'
+  },
+  {
+    type: 'mc',
+    q: 'In DNA, which base pairs with adenine?',
+    options: ['Uracil', 'Cytosine', 'Guanine', 'Thymine'],
+    correct: 3,
+    explain: 'In DNA: Adenine pairs with Thymine (A–T), and Cytosine pairs with Guanine (C–G). In RNA, Adenine pairs with Uracil (A–U).'
+  },
+  {
+    type: 'mc',
+    q: 'A section of mRNA reads: AUG–UCU–GGU–UAA. Which correctly describes this sequence?',
+    options: [
+      'Methionine–Serine–Glycine–Stop',
+      'Alanine–Leucine–Proline–Stop',
+      'Start–Valine–Arginine–Stop',
+      'Methionine–Glycine–Serine–Stop'
+    ],
+    correct: 0,
+    explain: 'AUG = Start/Methionine, UCU = Serine, GGU = Glycine, UAA = Stop codon. Translation begins at AUG and ends at a stop codon.'
+  },
+  {
+    type: 'mc',
+    q: 'Which of the following organisms is classified as a HETEROTROPH?',
+    options: ['Algae', 'Oak tree', 'Tiger', 'Cyanobacteria'],
+    correct: 2,
+    explain: 'A tiger cannot make its own food — it must eat other organisms. Algae, oak trees, and cyanobacteria are autotrophs that perform photosynthesis.'
+  },
+  {
+    type: 'mc',
+    q: 'Which organelle is responsible for making lipids in the cell?',
+    options: ['Rough endoplasmic reticulum', 'Golgi apparatus', 'Smooth endoplasmic reticulum', 'Lysosome'],
+    correct: 2,
+    explain: 'Smooth ER synthesizes lipids, metabolizes carbohydrates, and detoxifies drugs. Rough ER (with ribosomes) makes proteins.'
+  },
+];
+
+// State
+let currentFilter = 'all';
+let selectedMode = 'all';
+let gameState = null;
+let timerInterval = null;
+
+const TYPE_LABELS = { mc: 'Multiple Choice', tf: 'True / False', match: 'Matching', fill: 'Fill in the Blank' };
+const TYPE_CLASS  = { mc: 'tag-mc', tf: 'tag-tf', match: 'tag-match', fill: 'tag-fill' };
+const LETTERS = ['A','B','C','D'];
+
+// ── SCREENS ────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn')[['browse','play'].indexOf(name)].classList.add('active');
+  if (name === 'browse') renderQuestions(currentFilter);
+  if (name === 'play') resetPlayScreen();
+}
+
+// ── BROWSE ─────────────────────────────────────────────────────────────
+function filterQuestions(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderQuestions(type);
+}
+
+function renderQuestions(type) {
+  const filtered = type === 'all' ? QUESTIONS : QUESTIONS.filter(q => q.type === type || (type === 'match' && (q.type === 'match' || q.type === 'fill')));
+  const sub = document.getElementById('browseSubtitle');
+  sub.textContent = filtered.length + ' question' + (filtered.length !== 1 ? 's' : '');
+
+  document.getElementById('questionsList').innerHTML = filtered.map((q, i) => {
+    const realIdx = QUESTIONS.indexOf(q);
+    const ansHtml = q.options.map((o, j) =>
+      `<span class="q-ans-chip ${j === q.correct ? 'correct' : ''}">${LETTERS[j]}: ${o}${j === q.correct ? ' ✓' : ''}</span>`
+    ).join('');
+    return `<div class="q-list-item">
+      <div class="q-num-badge">${realIdx + 1}</div>
+      <div class="q-content">
+        <span class="q-type-tag ${TYPE_CLASS[q.type]}">${TYPE_LABELS[q.type]}</span>
+        <div class="q-text">${q.question || q.q}</div>
+        <div class="q-answers">${ansHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── PLAY ───────────────────────────────────────────────────────────────
+function selectMode(mode, card) {
+  selectedMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+function resetPlayScreen() {
+  document.getElementById('playStart').style.display = 'block';
+  document.getElementById('gameActive').style.display = 'none';
+  document.getElementById('resultsScreen').style.display = 'none';
+}
+
+function getPool() {
+  if (selectedMode === 'all') return [...QUESTIONS];
+  if (selectedMode === 'mc') return QUESTIONS.filter(q => q.type === 'mc');
+  if (selectedMode === 'tf') return QUESTIONS.filter(q => q.type === 'tf');
+  if (selectedMode === 'match') return QUESTIONS.filter(q => q.type === 'match' || q.type === 'fill');
+  return [...QUESTIONS];
+}
+
+function startGame() {
+  const pool = getPool();
+  gameState = { idx: 0, score: 0, wrong: 0, shuffled: pool.sort(() => Math.random() - 0.5) };
+  document.getElementById('playStart').style.display = 'none';
+  document.getElementById('gameActive').style.display = 'block';
+  document.getElementById('resultsScreen').style.display = 'none';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = gameState.shuffled[gameState.idx];
+  const total = gameState.shuffled.length;
+
+  document.getElementById('progressBar').style.width = ((gameState.idx / total) * 100) + '%';
+  document.getElementById('progressLabel').textContent = 'Q ' + (gameState.idx + 1) + ' of ' + total;
+  document.getElementById('scoreLabel').textContent = gameState.score;
+  document.getElementById('feedbackBar').style.display = 'none';
+  document.getElementById('explainBar').style.display = 'none';
+
+  const tag = document.getElementById('activeTag');
+  tag.textContent = TYPE_LABELS[q.type];
+  tag.className = 'active-type-tag ' + TYPE_CLASS[q.type];
+  document.getElementById('activeQuestion').textContent = q.q;
+
+  // Shuffle options but track correct answer text
+  const correctText = q.options[q.correct];
+  const shuffledOpts = [...q.options].sort(() => Math.random() - 0.5);
+  const newCorrectIdx = shuffledOpts.indexOf(correctText);
+
+  const isTF = q.type === 'tf';
+  const grid = document.getElementById('answersGrid');
+  grid.className = 'answers-grid ' + (isTF ? 'one-col' : 'two-col');
+
+  grid.innerHTML = shuffledOpts.map((opt, pos) =>
+    `<button class="answer-btn" onclick="selectAnswer(${pos === newCorrectIdx}, this, '${q.explain.replace(/'/g,"\\'")}', '${correctText.replace(/'/g,"\\'")}')">
+      <span class="ans-letter">${LETTERS[pos]}</span>
+      ${opt}
+    </button>`
+  ).join('');
+
+  const secs = isTF ? 10 : q.type === 'match' || q.type === 'fill' ? 25 : 20;
+  startTimer(secs);
+}
+
+function startTimer(seconds) {
+  clearInterval(timerInterval);
+  let t = seconds;
+  const el = document.getElementById('timerCircle');
+  el.textContent = t; el.classList.remove('urgent');
+  timerInterval = setInterval(() => {
+    t--;
+    el.textContent = t;
+    if (t <= 5) el.classList.add('urgent');
+    if (t <= 0) { clearInterval(timerInterval); timeUp(); }
+  }, 1000);
+}
+
+function timeUp() {
+  disableAnswers();
+  highlightCorrect();
+  const q = gameState.shuffled[gameState.idx];
+  showFeedback('timeout', "⏰ Time's up!");
+  showExplain(q.explain);
+  gameState.wrong++;
+  setTimeout(nextQuestion, 2500);
+}
+
+function selectAnswer(isCorrect, btn, explain, correctText) {
+  clearInterval(timerInterval);
+  disableAnswers();
+
+  if (isCorrect) {
+    gameState.score++;
+    document.getElementById('scoreLabel').textContent = gameState.score;
+    btn.classList.add('correct-reveal');
+    showFeedback('correct', '🎉 Correct!');
+  } else {
+    btn.classList.add('wrong-reveal');
+    highlightCorrect();
+    showFeedback('wrong', '❌ Not quite — the answer was: ' + correctText);
+    gameState.wrong++;
+  }
+  showExplain(explain);
+  setTimeout(nextQuestion, 2600);
+}
+
+function highlightCorrect() {
+  document.querySelectorAll('.answer-btn').forEach(b => {
+    // The correct btn has onclick with true as first arg
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').startsWith('selectAnswer(true')) {
+      b.classList.add('correct-reveal');
+    }
+  });
+}
+
+function disableAnswers() {
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+}
+
+function showFeedback(type, msg) {
+  const fb = document.getElementById('feedbackBar');
+  fb.textContent = msg; fb.className = 'feedback-bar ' + type; fb.style.display = 'block';
+}
+
+function showExplain(txt) {
+  const eb = document.getElementById('explainBar');
+  eb.textContent = '💡 ' + txt; eb.style.display = 'block';
+}
+
+function nextQuestion() {
+  gameState.idx++;
+  if (gameState.idx >= gameState.shuffled.length) endGame();
+  else loadQuestion();
+}
+
+function endGame() {
+  clearInterval(timerInterval);
+  document.getElementById('gameActive').style.display = 'none';
+  const results = document.getElementById('resultsScreen');
+  results.style.display = 'block';
+
+  const total = gameState.shuffled.length;
+  const score = gameState.score;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('finalScore').textContent = score + ' / ' + total;
+  document.getElementById('correctCount').textContent = score;
+  document.getElementById('wrongCount').textContent = gameState.wrong;
+  document.getElementById('pctCount').textContent = pct + '%';
+
+  let stars = '', msg = '';
+  if (pct >= 90) { stars = '⭐⭐⭐'; msg = 'Outstanding! You\'re ready for the test! 🏆'; }
+  else if (pct >= 75) { stars = '⭐⭐'; msg = 'Great job! Review the ones you missed and you\'re set! 💪'; }
+  else if (pct >= 50) { stars = '⭐'; msg = 'Good effort! Keep reviewing — you\'ve got this!'; }
+  else { stars = '📚'; msg = 'Keep studying! Go through the Browse tab to review all answers.'; }
+
+  document.getElementById('starsDisplay').textContent = stars;
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+// Init
+renderQuestions('all');
+</script>
+</body>
+</html>
