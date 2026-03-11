@@ -162,10 +162,10 @@
 
   .timer-wrap { display: flex; justify-content: center; margin-bottom: 18px; }
   .timer-circle {
-    width: 60px; height: 60px; border-radius: 50%;
+    width: 80px; height: 80px; border-radius: 50%;
     background: var(--card); border: 3px solid var(--accent2);
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--accent2);
+    font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--accent2);
     box-shadow: 0 0 20px rgba(250,204,21,0.3); transition: border-color 0.5s, color 0.5s;
   }
   .timer-circle.urgent { border-color: var(--accent1); color: var(--accent1); box-shadow: 0 0 20px rgba(244,63,94,0.5); animation: pulse 0.5s infinite alternate; }
@@ -830,19 +830,25 @@ function loadQuestion() {
     </button>`
   ).join('');
 
-  const secs = isTF ? 10 : q.type === 'match' || q.type === 'fill' ? 25 : 20;
+  const secs = isTF ? 180 : q.type === 'match' || q.type === 'fill' ? 240 : 420;
   startTimer(secs);
+}
+
+function formatTime(t) {
+  const m = Math.floor(t / 60);
+  const s = t % 60;
+  return m + ':' + (s < 10 ? '0' + s : s);
 }
 
 function startTimer(seconds) {
   clearInterval(timerInterval);
   let t = seconds;
   const el = document.getElementById('timerCircle');
-  el.textContent = t; el.classList.remove('urgent');
+  el.textContent = formatTime(t); el.classList.remove('urgent');
   timerInterval = setInterval(() => {
     t--;
-    el.textContent = t;
-    if (t <= 5) el.classList.add('urgent');
+    el.textContent = formatTime(t);
+    if (t <= 10) el.classList.add('urgent');
     if (t <= 0) { clearInterval(timerInterval); timeUp(); }
   }, 1000);
 }
